@@ -31,6 +31,12 @@ class User extends Authenticatable
         'employee_code',
         'hire_date',
         'status',
+        'company_id',
+        'branch_id',
+        'phone',
+        'avatar',
+        'last_login_at',
+        'last_login_ip',
     ];
 
     /**
@@ -55,6 +61,16 @@ class User extends Authenticatable
             'password' => 'hashed',
             'hire_date' => 'date',
         ];
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function department(): BelongsTo
@@ -111,5 +127,15 @@ class User extends Authenticatable
                 $query->where('users.id', '=', $this->id);
             })
             ->exists();
+    }
+
+    public function loginHistories(): HasMany
+    {
+        return $this->hasMany(LoginHistory::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(ErpNotification::class, 'user_id');
     }
 }
