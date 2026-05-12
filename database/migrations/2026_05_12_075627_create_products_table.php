@@ -15,6 +15,7 @@ return new class extends Migration
             $table->enum('type', ['stockable', 'consumable', 'service'])->default('stockable');
             $table->decimal('cost', 15, 2)->default(0);
             $table->decimal('price', 15, 2)->default(0);
+            $table->string('unit')->default('units');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

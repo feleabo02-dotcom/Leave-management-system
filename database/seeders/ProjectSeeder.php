@@ -51,7 +51,7 @@ class ProjectSeeder extends Seeder
                     'project_id' => $cloud->id,
                     'assigned_to' => $elena->id,
                     'deadline' => now()->addWeeks(2),
-                    'status' => 'pending',
+                    'status' => 'todo',
                 ]);
             }
         }

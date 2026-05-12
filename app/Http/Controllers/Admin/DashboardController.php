@@ -87,6 +87,12 @@ class DashboardController extends Controller
                 return $a;
             });
 
+        // 6. Recent Activities
+        $recentActivities = \App\Models\AuditLog::with('user')
+            ->latest()
+            ->take(8)
+            ->get();
+
         return view('erp.admin.dashboard', compact(
             'currentAttendance',
             'activeTasks',
@@ -97,7 +103,8 @@ class DashboardController extends Controller
             'chartExpenses',
             'revenueByCategory',
             'projectStatusCounts',
-            'lastCheckIns'
+            'lastCheckIns',
+            'recentActivities'
         ));
     }
 }

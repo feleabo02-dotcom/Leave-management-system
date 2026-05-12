@@ -11,7 +11,31 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
+// ── Database Maintenance (Moved outside auth for initial setup) ────────────
+Route::get('/system/migrate', function() {
+    if (request('token') !== 'xobiya-secret-123') abort(403);
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return "Migration successful: " . \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Exception $e) {
+        return "Migration failed: " . $e->getMessage();
+    }
+})->name('system.migrate');
+
+Route::get('/system/seed', function() {
+    if (request('token') !== 'xobiya-secret-123') abort(403);
+    try {
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        return "Seeding successful: " . \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Exception $e) {
+        return "Seeding failed: " . $e->getMessage();
+    }
+})->name('system.seed');
+
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    // ── Global Search ─────────────────────────────────────────────────────
+    Route::get('/search', \App\Http\Controllers\SearchController::class)->name('global.search');
 
     // ── Dashboard (role-aware) ────────────────────────────────────────────
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -85,6 +109,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/allocations', [\App\Http\Controllers\Admin\AllocationController::class, 'store'])->name('admin.allocations.store');
     Route::get('/admin/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('admin.users');
     Route::post('/admin/users/{user}/assign-role', [\App\Http\Controllers\Admin\UserController::class, 'assignRole'])->name('admin.users.assign-role');
+    
+    // Roles & Permissions
+    Route::get('/admin/roles', [\App\Http\Controllers\Admin\RoleController::class, 'index'])->name('admin.roles.index');
+    Route::get('/admin/roles/{role}/permissions', [\App\Http\Controllers\Admin\RoleController::class, 'editPermissions'])->name('admin.roles.permissions');
+    Route::post('/admin/roles/{role}/permissions', [\App\Http\Controllers\Admin\RoleController::class, 'updatePermissions'])->name('admin.roles.permissions.update');
+
     Route::get('/admin/settings', fn() => view('erp.admin.settings'))->name('admin.settings');
     Route::get('/admin/react-dashboard', fn() => view('erp.admin.react-dashboard'))->name('admin.react-dashboard');
 
@@ -105,6 +135,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/my-attendance', [\App\Http\Controllers\AttendanceController::class, 'myAttendance'])->name('attendance.my');
     Route::post('/attendance/check-in', [\App\Http\Controllers\AttendanceController::class, 'checkIn'])->name('attendance.check-in');
     Route::post('/attendance/check-out', [\App\Http\Controllers\AttendanceController::class, 'checkOut'])->name('attendance.check-out');
+    Route::post('/attendance', [\App\Http\Controllers\AttendanceController::class, 'store'])->name('attendance.store');
+    Route::put('/attendance/{attendance}', [\App\Http\Controllers\AttendanceController::class, 'update'])->name('attendance.update');
+    Route::get('/attendance/export-csv', [\App\Http\Controllers\AttendanceController::class, 'exportCsv'])->name('attendance.export-csv');
+    Route::get('/attendance/monthly', [\App\Http\Controllers\AttendanceController::class, 'myAttendance'])->name('attendance.monthly');
     // ── Phase 4 — Payroll ────────────────────────────────────────────────
     Route::get('/payroll', [\App\Http\Controllers\PayrollController::class, 'index'])->name('payroll.index');
     Route::get('/my-payslips', [\App\Http\Controllers\PayrollController::class, 'myPayslips'])->name('payroll.my');
@@ -129,6 +163,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/crm/opportunities/{opportunity}', [\App\Http\Controllers\CrmController::class, 'showOpportunity'])->name('crm.opportunities.show');
     Route::post('/crm/opportunities/{opportunity}/stage', [\App\Http\Controllers\CrmController::class, 'updateStage'])->name('crm.opportunities.stage');
     Route::post('/crm/opportunities/{opportunity}/activity', [\App\Http\Controllers\CrmController::class, 'logActivity'])->name('crm.opportunities.activity');
+    Route::post('/crm/opportunities/{opportunity}/convert', [\App\Http\Controllers\CrmController::class, 'convertToQuotation'])->name('crm.convert');
     // ── Phase 9 — Sales ─────────────────────────────────────────────────
     Route::resource('sales', \App\Http\Controllers\SalesController::class);
     Route::post('/sales/{order}/confirm', [\App\Http\Controllers\SalesController::class, 'confirm'])->name('sales.confirm');
@@ -136,6 +171,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/accounting', [\App\Http\Controllers\AccountingController::class, 'index'])->name('accounting.index');
     Route::get('/accounting/coa', [\App\Http\Controllers\AccountingController::class, 'coa'])->name('accounting.coa');
     Route::get('/accounting/journals', [\App\Http\Controllers\AccountingController::class, 'journals'])->name('accounting.journals');
+    Route::get('/accounting/reports/pnl', [\App\Http\Controllers\AccountingController::class, 'profitAndLoss'])->name('accounting.reports.pnl');
     Route::post('/accounting/accounts', [\App\Http\Controllers\AccountingController::class, 'storeAccount'])->name('accounting.accounts.store');
     
     // ── Phase 11 — Manufacturing ────────────────────────────────────────

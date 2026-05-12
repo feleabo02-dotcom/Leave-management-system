@@ -111,8 +111,8 @@ class EmployeeSeeder extends Seeder
             $dept = Department::where('code', $person['dept'])->first();
             $pos = Position::where('title', $person['pos'])->first();
 
-            $employee = Employee::updateOrCreate(['user_id' => $user->id], [
-                'employee_code' => $person['code'],
+            $employee = Employee::updateOrCreate(['employee_code' => $person['code']], [
+                'user_id' => $user->id,
                 'department_id' => $dept->id,
                 'position_id' => $pos->id,
                 'hire_date' => Carbon::now()->subMonths(rand(6, 24)),

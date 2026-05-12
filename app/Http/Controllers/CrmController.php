@@ -100,6 +100,38 @@ class CrmController extends Controller
         return back()->with('success', 'Activity logged.');
     }
 
+    public function convertToQuotation(Opportunity $opportunity)
+    {
+        $this->authorize('sales.create');
+
+        // 1. Create the Sales Order (Quotation)
+        $order = \App\Models\SalesOrder::create([
+            'customer_id' => $opportunity->customer_id,
+            'code' => 'QUO-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+            'date' => now(),
+            'total_amount' => $opportunity->expected_revenue,
+            'status' => 'draft',
+            'created_by' => auth()->id(),
+        ]);
+
+        // 2. Mark Opportunity as WON
+        $opportunity->update([
+            'stage' => 'won',
+            'probability' => 100
+        ]);
+
+        // 3. Log Activity
+        \App\Models\CrmActivity::create([
+            'opportunity_id' => $opportunity->id,
+            'user_id' => auth()->id(),
+            'type' => 'task',
+            'date' => now(),
+            'notes' => 'Converted to Quotation: ' . $order->code,
+        ]);
+
+        return redirect()->route('sales.index')->with('success', 'Opportunity successfully converted to Quotation ' . $order->code);
+    }
+
     public function showOpportunity(Opportunity $opportunity)
     {
         $opportunity->load(['customer', 'activities.user']);

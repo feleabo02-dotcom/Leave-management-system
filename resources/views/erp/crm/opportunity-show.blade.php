@@ -8,6 +8,15 @@
             <p class="text-sm text-gray-500 mt-0.5">Customer: {{ $opportunity->customer->name }}</p>
         </div>
         <div class="flex gap-2">
+            @if($opportunity->stage !== 'won')
+                <form action="{{ route('crm.convert', $opportunity) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-emerald-700 transition flex items-center gap-2 shadow-lg shadow-emerald-200">
+                        <i class="ph-bold ph-receipt"></i>
+                        New Quotation
+                    </button>
+                </form>
+            @endif
             <select onchange="window.location.href=this.value" class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium bg-white outline-none">
                 <option>Change Stage...</option>
                 @foreach(['new', 'qualified', 'proposition', 'won', 'lost'] as $st)

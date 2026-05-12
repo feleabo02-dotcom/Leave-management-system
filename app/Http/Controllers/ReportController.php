@@ -32,30 +32,35 @@ class ReportController extends Controller
     public function attendanceSummary()
     {
         $this->authorize('reports.read');
-        $attendanceData = Attendance::selectRaw("strftime('%m', check_in) as month, strftime('%Y', check_in) as year, COUNT(*) as total_present, SUM(CASE WHEN strftime('%H:%M', check_in) > '09:00' THEN 1 ELSE 0 END) as total_late")
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
+
+        $driver = DB::getDriverName();
+
+        $records = Attendance::select(
+            DB::raw($driver === 'mysql' ? "DATE_FORMAT(date, '%Y-%m') as year_month" : "strftime('%Y-%m', date) as year_month"),
+            DB::raw('COUNT(*) as total_records'),
+            DB::raw("SUM(CASE WHEN status IN ('present','late') THEN 1 ELSE 0 END) as total_present"),
+            DB::raw("SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as total_absent"),
+            DB::raw("SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as total_late"),
+            DB::raw('SUM(total_hours) as total_hours'),
+            DB::raw('SUM(overtime_hours) as total_overtime'),
+        )
+            ->whereNotNull('date')
+            ->groupBy('year_month')
+            ->orderBy('year_month', 'desc')
             ->get();
+
+        $attendanceData = $records->map(function ($r) {
+            $parts = explode('-', $r->year_month);
+            return (object) [
+                'year' => $parts[0],
+                'month' => $parts[1],
+                'total_present' => $r->total_present,
+                'total_absent' => $r->total_absent,
+                'total_late' => $r->total_late,
+                'total_overtime_hours' => $r->total_overtime,
+            ];
+        });
+
         return view('erp.reports.attendance-summary', compact('attendanceData'));
-    }
-
-    public function accountingReports(Request $request)
-    {
-        $this->authorize('reports.read');
-        $type = $request->input('type', 'trial_balance');
-
-        $accounts = Account::all();
-        $incomeAccounts = Account::where('type', 'income')->get();
-        $expenseAccounts = Account::where('type', 'expense')->get();
-        $assetAccounts = Account::where('type', 'asset')->get();
-        $liabilityAccounts = Account::where('type', 'liability')->get();
-        $equityAccounts = Account::where('type', 'equity')->get();
-        $netIncome = $incomeAccounts->sum('balance') - $expenseAccounts->sum('balance');
-
-        return view('erp.reports.accounting', compact(
-            'type', 'accounts', 'incomeAccounts', 'expenseAccounts',
-            'assetAccounts', 'liabilityAccounts', 'equityAccounts', 'netIncome'
-        ));
     }
 }

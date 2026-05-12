@@ -13,7 +13,7 @@ use App\Models\Shift;
 
 class Employee extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\LogsActivity;
 
     protected $fillable = [
         'employee_code', 'user_id', 'company_id', 'department_id', 
@@ -80,5 +80,20 @@ class Employee extends Model
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
+    }
+
+    public function shift(): BelongsTo
+    {
+        return $this->belongsTo(Shift::class);
+    }
+
+    public function salaryStructure(): BelongsTo
+    {
+        return $this->belongsTo(SalaryStructure::class);
+    }
+
+    public function assets(): HasMany
+    {
+        return $this->hasMany(Asset::class, 'employee_id');
     }
 }

@@ -162,6 +162,14 @@ class DatabaseSeeder extends Seeder
             'status'   => 'active',
         ]);
 
+        \App\Models\Employee::updateOrCreate(['user_id' => $employee->id], [
+            'employee_code' => 'EMP-TEST-001',
+            'department_id' => $departments->id,
+            'position_id' => \App\Models\Position::first()->id,
+            'hire_date' => now()->subMonths(14),
+            'status' => 'active',
+        ]);
+
         $hr = User::query()->updateOrCreate(['email' => 'hr@hrleave.test'], [
             'name'     => 'HR User',
             'password' => $defaultPassword,

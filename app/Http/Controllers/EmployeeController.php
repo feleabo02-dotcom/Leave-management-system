@@ -6,16 +6,25 @@ use App\Models\Employee;
 use App\Models\Department;
 use App\Models\Position;
 use App\Models\User;
+use App\Models\Shift;
+use App\Models\SalaryStructure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
 class EmployeeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $employees = Employee::with(['user', 'department', 'position'])->latest()->paginate(15);
-        return view('erp.employees.index', compact('employees'));
+        $query = Employee::with(['user', 'department', 'position']);
+
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        $employees = $query->latest()->paginate(15);
+        $departments = Department::all();
+        return view('erp.employees.index', compact('employees', 'departments'));
     }
 
     public function create()
@@ -25,8 +34,10 @@ class EmployeeController extends Controller
         $managers = User::whereHas('roles', function($q) {
             $q->whereIn('slug', ['super_admin', 'admin', 'hr_manager']);
         })->get();
+        $shifts = Shift::where('is_active', true)->get();
+        $salaryStructures = SalaryStructure::where('is_active', true)->get();
 
-        return view('erp.employees.create', compact('departments', 'positions', 'managers'));
+        return view('erp.employees.create', compact('departments', 'positions', 'managers', 'shifts', 'salaryStructures'));
     }
 
     public function store(Request $request)
@@ -40,6 +51,11 @@ class EmployeeController extends Controller
             'position_id' => 'nullable|exists:positions,id',
             'manager_id' => 'nullable|exists:users,id',
             'hire_date' => 'required|date',
+            'dob' => 'nullable|date',
+            'gender' => 'nullable|in:male,female,other',
+            'shift_id' => 'nullable|exists:shifts,id',
+            'salary_structure_id' => 'nullable|exists:salary_structures,id',
+            'emergency_contact' => 'nullable|json',
         ]);
 
         DB::transaction(function () use ($validated, $request) {
@@ -51,7 +67,6 @@ class EmployeeController extends Controller
                 'manager_id' => $validated['manager_id'],
             ]);
 
-            // Assign basic employee role
             $role = \App\Models\Role::where('slug', 'employee')->first();
             if ($role) {
                 $user->roles()->attach($role->id);
@@ -64,6 +79,11 @@ class EmployeeController extends Controller
                 'position_id' => $validated['position_id'],
                 'manager_id' => $validated['manager_id'],
                 'hire_date' => $validated['hire_date'],
+                'dob' => $validated['dob'],
+                'gender' => $validated['gender'],
+                'shift_id' => $validated['shift_id'],
+                'salary_structure_id' => $validated['salary_structure_id'],
+                'emergency_contact' => $validated['emergency_contact'] ? json_decode($validated['emergency_contact'], true) : null,
                 'status' => 'active',
             ]);
         });
@@ -73,7 +93,12 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee)
     {
-        $employee->load(['user', 'department', 'position', 'manager', 'contracts', 'documents', 'histories.changer']);
+        $employee->load([
+            'user', 'department', 'position', 'manager', 
+            'contracts', 'documents', 'histories.changer',
+            'skills.skill', 'skills.skillLevel', 'resumeLines.lineType', 'shift', 'salaryStructure',
+            'user.leaveAllocations.leaveType', 'user.leaveRequests.leaveType',
+        ]);
         return view('erp.employees.show', compact('employee'));
     }
 
@@ -84,8 +109,10 @@ class EmployeeController extends Controller
         $managers = User::whereHas('roles', function($q) {
             $q->whereIn('slug', ['super_admin', 'admin', 'hr_manager']);
         })->get();
+        $shifts = Shift::where('is_active', true)->get();
+        $salaryStructures = SalaryStructure::where('is_active', true)->get();
 
-        return view('erp.employees.edit', compact('employee', 'departments', 'positions', 'managers'));
+        return view('erp.employees.edit', compact('employee', 'departments', 'positions', 'managers', 'shifts', 'salaryStructures'));
     }
 
     public function update(Request $request, Employee $employee)
@@ -95,6 +122,11 @@ class EmployeeController extends Controller
             'position_id' => 'nullable|exists:positions,id',
             'manager_id' => 'nullable|exists:users,id',
             'status' => 'required|in:active,probation,terminated,suspended',
+            'shift_id' => 'nullable|exists:shifts,id',
+            'salary_structure_id' => 'nullable|exists:salary_structures,id',
+            'emergency_contact' => 'nullable|json',
+            'dob' => 'nullable|date',
+            'gender' => 'nullable|in:male,female,other',
         ]);
 
         $employee->update($validated);
@@ -112,21 +144,16 @@ class EmployeeController extends Controller
     public function destroy(Employee $employee)
     {
         $employee->delete();
-        // Soft delete or handle user account appropriately, e.g.:
-        // $employee->user->delete();
         
         return redirect()->route('employees.index')->with('success', 'Employee removed successfully.');
     }
 
     public function orgChart()
     {
-        // Get all departments with their manager and employees
         $departments = Department::with(['manager', 'employees.user', 'employees.position'])->get();
         
-        // Group users by manager to build a tree
         $users = User::with(['department', 'roles'])->get();
         
-        // Build hierarchy based on manager_id
         $hierarchy = $this->buildHierarchy($users);
 
         return view('erp.employees.org-chart', compact('departments', 'hierarchy'));

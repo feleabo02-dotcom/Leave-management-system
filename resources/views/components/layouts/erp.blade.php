@@ -18,10 +18,16 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         [x-cloak] { display: none !important; }
         .sidebar-brand { background: #0f172a; }
-        .module-active { background: #4f46e5; color: white; }
-        .submenu-active { color: #4f46e5; border-bottom: 2px solid #4f46e5; }
+        .module-active { 
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); 
+            color: white; 
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+        }
+        .submenu-active { color: #4f46e5; font-weight: 800; border-bottom: 2px solid #4f46e5; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .sidebar-link-hover:hover { background: rgba(255,255,255,0.05); transform: translateX(4px); }
+        .glass-panel { background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); }
     </style>
 </head>
 <body class="h-full bg-slate-50 text-slate-900" x-data="{ sidebarOpen: true }">
@@ -84,6 +90,7 @@
                     ['route' => 'accounting.index',        'label' => 'General Ledger'],
                     ['route' => 'accounting.coa',          'label' => 'Chart of Accounts'],
                     ['route' => 'accounting.journals',     'label' => 'Financial Journals'],
+                    ['route' => 'accounting.reports.pnl',  'label' => 'Financial Performance'],
                     ['route' => 'accounting.invoices',     'label' => 'Customer Invoices'],
                     ['route' => 'accounting.taxes',        'label' => 'Tax Configurations'],
                     ['route' => 'assets.index',            'label' => 'Asset Register'],
@@ -119,6 +126,7 @@
                 'children' => [
                     ['route' => 'admin.dashboard',         'label' => 'Control Panel'],
                     ['route' => 'admin.users',             'label' => 'Users & Security'],
+                    ['route' => 'admin.roles.index',       'label' => 'Roles & Permissions'],
                     ['route' => 'companies.index',         'label' => 'Legal Entities'],
                 ]
             ]
@@ -166,7 +174,7 @@
         {{-- Primary Modules --}}
         <nav class="flex-1 overflow-y-auto custom-scrollbar py-6 px-3 space-y-2">
             <a href="{{ route('dashboard') }}" 
-               class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black tracking-widest transition-all
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black tracking-widest transition-all sidebar-link-hover
                       {{ $isHome ? 'module-active' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                 <i class="ph-bold ph-squares-four text-lg"></i>
                 <span x-show="sidebarOpen" x-transition>DASHBOARD</span>
@@ -177,7 +185,7 @@
             @foreach($navigation as $name => $module)
                 @php $isActive = ($activeModuleName === $name); @endphp
                 <a href="{{ route($module['main_route']) }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black tracking-widest transition-all
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black tracking-widest transition-all sidebar-link-hover
                           {{ $isActive ? 'module-active shadow-lg shadow-indigo-950/50' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i class="ph-bold {{ $module['icon'] }} text-lg flex-shrink-0"></i>
                     <span x-show="sidebarOpen" x-transition class="whitespace-nowrap">{{ $name }}</span>
@@ -213,7 +221,100 @@
                     <h2 class="text-sm font-bold text-slate-900">{{ $title ?? 'Overview' }}</h2>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button class="text-slate-400 hover:text-slate-600 transition"><i class="ph ph-magnifying-glass text-lg"></i></button>
+                    {{-- Global Search Component --}}
+                    <div class="relative" x-data="{ 
+                        searchQuery: '', 
+                        results: [], 
+                        showResults: false,
+                        loading: false,
+                        fetchResults() {
+                            if (this.searchQuery.length < 2) {
+                                this.results = [];
+                                this.showResults = false;
+                                return;
+                            }
+                            this.loading = true;
+                            fetch(`/search?q=${encodeURIComponent(this.searchQuery)}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    this.results = data;
+                                    this.showResults = true;
+                                    this.loading = false;
+                                });
+                        }
+                    }">
+                        <div class="relative group">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition"></i>
+                            <input type="text" 
+                                   x-model="searchQuery" 
+                                   @input.debounce.300ms="fetchResults()"
+                                   @focus="if(results.length > 0) showResults = true"
+                                   @click.away="showResults = false"
+                                   @keydown.escape="showResults = false"
+                                   placeholder="Search anything... (Ctrl + K)" 
+                                   class="w-64 pl-10 pr-4 py-1.5 bg-slate-100 border-none rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-600/20 focus:bg-white transition-all duration-200">
+                        </div>
+
+                        {{-- Search Results Dropdown --}}
+                        <div x-show="showResults" x-cloak
+                             class="absolute left-0 mt-2 w-[400px] bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                            <div class="p-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Search Results</span>
+                                <template x-if="loading">
+                                    <i class="ph ph-circle-notch animate-spin text-indigo-600"></i>
+                                </template>
+                            </div>
+                            <div class="max-h-[400px] overflow-y-auto custom-scrollbar py-2">
+                                <template x-if="results.length === 0">
+                                    <div class="px-4 py-8 text-center">
+                                        <i class="ph ph-ghost text-3xl text-slate-200 mb-2"></i>
+                                        <p class="text-xs font-bold text-slate-400">No results found for "<span x-text="searchQuery"></span>"</p>
+                                    </div>
+                                </template>
+                                <template x-for="result in results" :key="result.url">
+                                    <a :href="result.url" class="flex items-center gap-4 px-4 py-3 hover:bg-slate-50 transition group">
+                                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition">
+                                            <i :class="'ph ph-bold ' + result.icon" class="text-lg"></i>
+                                        </div>
+                                        <div class="flex-1 overflow-hidden">
+                                            <div class="flex items-center justify-between">
+                                                <p class="text-xs font-bold text-slate-900 truncate" x-text="result.title"></p>
+                                                <span class="text-[8px] font-black px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded uppercase tracking-tighter" x-text="result.type"></span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400 truncate mt-0.5" x-text="result.subtitle"></p>
+                                        </div>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Quick Action Button --}}
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" 
+                                class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                            <i class="ph ph-plus text-lg"></i>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-cloak
+                             class="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-2">
+                            <div class="px-4 py-2 border-b border-slate-50 mb-1">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quick Create</span>
+                            </div>
+                            <a href="{{ route('employees.create') }}" class="flex items-center gap-3 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                                <i class="ph ph-user-plus text-lg text-indigo-500"></i> New Employee
+                            </a>
+                            <a href="{{ route('projects.index') }}" class="flex items-center gap-3 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                                <i class="ph ph-projector-screen text-lg text-emerald-500"></i> New Project
+                            </a>
+                            <a href="#" class="flex items-center gap-3 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                                <i class="ph ph-check-square text-lg text-amber-500"></i> New Task
+                            </a>
+                            <a href="{{ route('sales.index') }}" class="flex items-center gap-3 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                                <i class="ph ph-shopping-cart text-lg text-rose-500"></i> Sales Order
+                            </a>
+                        </div>
+                    </div>
+
                     <button class="text-slate-400 hover:text-slate-600 transition"><i class="ph ph-bell text-lg"></i></button>
                     <div class="w-px h-4 bg-slate-200"></div>
                     
@@ -287,7 +388,11 @@
 
         {{-- Page Body --}}
         <div class="p-8 flex-1">
-            {{ $slot }}
+            @if(isset($slot))
+                {{ $slot }}
+            @else
+                @yield('content')
+            @endif
         </div>
     </main>
 

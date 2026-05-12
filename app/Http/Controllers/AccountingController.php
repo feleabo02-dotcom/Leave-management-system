@@ -45,4 +45,24 @@ class AccountingController extends Controller
         $journals = Journal::withCount('entries')->get();
         return view('erp.accounting.journals', compact('journals'));
     }
+
+    public function profitAndLoss()
+    {
+        $this->authorize('accounting.read');
+        
+        $incomeAccounts = Account::where('type', 'income')->get();
+        $expenseAccounts = Account::where('type', 'expense')->get();
+
+        $totalIncome = $incomeAccounts->sum(fn($a) => $a->balance);
+        $totalExpense = $expenseAccounts->sum(fn($a) => $a->balance);
+        $netProfit = $totalIncome - $totalExpense;
+
+        return view('erp.accounting.reports.pnl', compact(
+            'incomeAccounts', 
+            'expenseAccounts', 
+            'totalIncome', 
+            'totalExpense', 
+            'netProfit'
+        ));
+    }
 }
