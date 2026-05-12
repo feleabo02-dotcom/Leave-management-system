@@ -93,5 +93,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: deploy/
           server-dir: /
-          protocol: ftps
+          protocol: ftp
           port: 21
