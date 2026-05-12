@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\LeaveRequest;
 use App\Models\Attendance;
 use App\Models\Task;
+use App\Helpers\DatabaseHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -42,7 +43,7 @@ class DashboardController extends Controller
         $tasksCompleted = Task::whereIn('assigned_to', $reportIds)
             ->where('status', 'completed')
             ->where('updated_at', '>=', now()->startOfWeek())
-            ->selectRaw('strftime("%w", updated_at) as day, COUNT(*) as count')
+            ->selectRaw('COUNT(*) as count, ' . DatabaseHelper::dayOfWeek('updated_at'))
             ->groupBy('day')
             ->get()
             ->pluck('count', 'day');

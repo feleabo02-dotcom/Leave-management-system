@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\Attendance;
+use App\Helpers\DatabaseHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -31,7 +32,7 @@ class DashboardController extends Controller
 
         // 2. Hiring Trend (Last 6 Months - Area Chart)
         $hiringTrend = Employee::where('hire_date', '>=', now()->subMonths(6))
-            ->selectRaw('COUNT(*) as count, strftime("%m", hire_date) as month')
+            ->selectRaw('COUNT(*) as count, ' . DatabaseHelper::month('hire_date'))
             ->groupBy('month')
             ->orderBy('month')
             ->get();

@@ -8,6 +8,7 @@ use App\Models\LeaveType;
 use App\Models\Attendance;
 use App\Services\LeaveBalanceService;
 use App\Services\LeaveDashboardService;
+use App\Helpers\DatabaseHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,7 @@ class LeaveDashboardController extends Controller
         }
         $attendanceData = Attendance::where('employee_id', $user->employee->id)
             ->whereBetween('check_in', [$startOfWeek, now()->endOfWeek()])
-            ->selectRaw('strftime("%w", check_in) as day, COUNT(*) as count')
+            ->selectRaw('COUNT(*) as count, ' . DatabaseHelper::dayOfWeek('check_in'))
             ->groupBy('day')
             ->get()
             ->pluck('count', 'day');

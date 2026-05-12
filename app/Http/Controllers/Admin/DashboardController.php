@@ -14,6 +14,7 @@ use App\Models\Attendance;
 use App\Models\Opportunity;
 use App\Models\Product;
 use App\Models\Department;
+use App\Helpers\DatabaseHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -34,7 +35,7 @@ class DashboardController extends Controller
         // 2. Chart Data: Sales vs Expenses (Bar)
         $salesData = SalesOrder::where('status', 'sale')
             ->where('date', '>=', now()->subMonths(6))
-            ->selectRaw('SUM(total_amount) as total, strftime("%m", date) as month')
+            ->selectRaw('SUM(total_amount) as total, ' . DatabaseHelper::month('date'))
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -42,7 +43,7 @@ class DashboardController extends Controller
 
         $expenseData = JournalItem::whereHas('account', fn($q) => $q->where('type', 'expense'))
             ->whereDate('created_at', '>=', now()->subMonths(6))
-            ->selectRaw('SUM(debit) as total, strftime("%m", created_at) as month')
+            ->selectRaw('SUM(debit) as total, ' . DatabaseHelper::month('created_at'))
             ->groupBy('month')
             ->orderBy('month')
             ->get()

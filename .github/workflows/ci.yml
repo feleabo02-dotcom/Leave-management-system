@@ -1,97 +1,84 @@
-name: CI
+name: Production Deployment
 
 on:
   push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+    branches: [main]
 
 jobs:
-  frontend:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Build frontend assets
-        run: npm run build
-
-  deploy:
-    if: github.ref_name == 'main' || github.ref_name == 'master'
-    needs: [frontend]
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
+      # 1. Environment Setup
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
-          extensions: mbstring, dom, fileinfo, pdo, pdo_mysql, bcmath, json, xml, curl
+          php-version: '8.3' # InfinityFree usually supports up to 8.3
+          extensions: mbstring, dom, fileinfo, pdo_mysql, bcmath
           coverage: none
-
-      - name: Install composer dependencies (no dev)
-        run: composer install --prefer-dist --no-interaction --no-progress --no-dev --optimize-autoloader
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version: 20
+          cache: 'npm'
 
-      - name: Install npm dependencies and build
+      # 2. Install & Build (Production Optimized)
+      - name: Install Dependencies
         run: |
+          composer install --no-dev --optimize-autoloader --no-interaction
           npm ci
           npm run build
 
-      - name: Create production .env
+      # 3. Secure Environment Configuration
+      - name: Create .env
         run: |
-          cp .env.example .env
-          php artisan key:generate
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
+          echo "${{ secrets.PROD_ENV_FILE }}" > .env
+          # Use a static key from secrets instead of generating a new one
+          # To ensure sessions persist across deployments
 
-      - name: Prepare InfinityFree directory structure
+      # 4. Prepare Atomic Deployment Directory
+      # This moves the 'public' content to 'htdocs' while keeping the core separate
+      - name: Stage Deployment
         run: |
-          mkdir -p deploy/laravel deploy/htdocs
-          rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' \
-            --exclude='tests' --exclude='deploy' --exclude='storage/logs/*' \
-            --exclude='storage/framework/cache/data/*' --exclude='.env' \
-            . deploy/laravel/
-          rsync -a public/ deploy/htdocs/
+          mkdir -p build_dir/htdocs
+          mkdir -p build_dir/core
+          
+          # Move public contents to htdocs
+          cp -r public/* build_dir/htdocs/
+          cp public/.htaccess build_dir/htdocs/
+          
+          # Move core files to core (excluding sensitive/unnecessary data)
+          rsync -av --progress . build_dir/core --exclude public --exclude .git --exclude .github --exclude node_modules --exclude tests
 
-      - name: Write InfinityFree htdocs/index.php
+      # 5. Professional index.php Routing
+      # Points the public index to the core directory
+      - name: Patch index.php
         run: |
-          cat > deploy/htdocs/index.php << 'PHPEOF'
+          cat > build_dir/htdocs/index.php << 'EOF'
           <?php
-          use Illuminate\Http\Request;
           define('LARAVEL_START', microtime(true));
-          if (file_exists($maintenance = __DIR__.'/../laravel/storage/framework/maintenance.php')) {
-              require $maintenance;
-          }
-          require __DIR__.'/../laravel/vendor/autoload.php';
-          $app = require_once __DIR__.'/../laravel/bootstrap/app.php';
-          $app->handleRequest(Request::capture());
-          PHPEOF
+          require __DIR__.'/../core/vendor/autoload.php';
+          $app = require_once __DIR__.'/../core/bootstrap/app.php';
+          $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+          $response = $kernel->handle(
+              $request = Illuminate\Http\Request::capture()
+          );
+          $response->send();
+          $kernel->terminate($request, $response);
+          EOF
 
-      - name: Upload via FTP to InfinityFree
+      # 6. Smart Sync Deployment
+      - name: Deploy to InfinityFree
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: deploy/
-          server-dir: /
-          protocol: ftp
-          port: 21
+          local-dir: build_dir/
+          server-dir: ./
+          # This ensures we don't delete logs or user uploads on the server
+          dangerous-clean-slate: false
