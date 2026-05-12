@@ -130,6 +130,15 @@ class RolePermissionSeeder extends Seeder
             ],
         ],
         [
+            'name' => 'Manager',
+            'slug' => 'manager',
+            'permissions' => [
+                'leave.read', 'leave.approve',
+                'attendance.read',
+                'projects.read', 'reports.read',
+            ],
+        ],
+        [
             'name' => 'Employee',
             'slug' => 'employee',
             'permissions' => [

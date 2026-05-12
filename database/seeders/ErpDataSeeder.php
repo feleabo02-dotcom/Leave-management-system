@@ -9,6 +9,7 @@ class ErpDataSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            EmployeeSeeder::class,
             AccountingSeeder::class,
             AssetSeeder::class,
             CrmSalesSeeder::class,

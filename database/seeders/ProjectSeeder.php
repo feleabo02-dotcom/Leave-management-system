@@ -11,26 +11,49 @@ class ProjectSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::first();
+        $alex = User::where('email', 'alex.rivera@xobiyahr.com')->first() ?? User::first();
+        $jordan = User::where('email', 'jordan.smith@xobiyahr.com')->first();
+        $elena = User::where('email', 'elena.r@xobiyahr.com')->first();
 
-        if ($admin) {
-            $project = Project::updateOrCreate(['code' => 'PRJ/ERP/001'], [
-                'name' => 'ERP Implementation',
-                'manager_id' => $admin->id,
+        if ($alex) {
+            // Project 1: ERP
+            $erp = Project::updateOrCreate(['code' => 'PRJ-2026-001'], [
+                'name' => 'XobiyaHR Modernization',
+                'manager_id' => $alex->id,
                 'status' => 'active',
             ]);
 
-            Task::updateOrCreate(['project_id' => $project->id, 'title' => 'Sidebar Reorganization'], [
-                'assigned_to' => $admin->id,
-                'deadline' => now()->addDays(5),
+            Task::updateOrCreate(['title' => 'Redesign Sidebar Navigation'], [
+                'project_id' => $erp->id,
+                'assigned_to' => $alex->id,
+                'deadline' => now()->addDays(3),
                 'status' => 'done',
             ]);
 
-            Task::updateOrCreate(['project_id' => $project->id, 'title' => 'Module Data Seeding'], [
-                'assigned_to' => $admin->id,
-                'deadline' => now()->addDays(2),
-                'status' => 'progress',
+            if ($jordan) {
+                Task::updateOrCreate(['title' => 'Implement Password Visibility Toggles'], [
+                    'project_id' => $erp->id,
+                    'assigned_to' => $jordan->id,
+                    'deadline' => now()->addDays(1),
+                    'status' => 'progress',
+                ]);
+            }
+
+            // Project 2: Cloud Migration
+            $cloud = Project::updateOrCreate(['code' => 'PRJ-2026-002'], [
+                'name' => 'Cloud Infrastructure Migration',
+                'manager_id' => $alex->id,
+                'status' => 'active',
             ]);
+
+            if ($elena) {
+                Task::updateOrCreate(['title' => 'Security Audit & Compliance'], [
+                    'project_id' => $cloud->id,
+                    'assigned_to' => $elena->id,
+                    'deadline' => now()->addWeeks(2),
+                    'status' => 'pending',
+                ]);
+            }
         }
     }
 }

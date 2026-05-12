@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             'admin'       => Role::where('slug', 'admin')->first(),
             'employee'    => Role::where('slug', 'employee')->first(),
             'hr_manager'  => Role::where('slug', 'hr_manager')->first(),
+            'manager'     => Role::where('slug', 'manager')->first(),
         ];
 
         $departments = Department::query()->updateOrCreate(
@@ -171,7 +172,7 @@ class DatabaseSeeder extends Seeder
 
         $superAdmin->roles()->sync([$roles['super_admin']->id]);
         $admin->roles()->sync([$roles['admin']->id]);
-        $manager->roles()->sync([$roles['employee']->id]);
+        $manager->roles()->sync([$roles['manager']->id]);
         $employee->roles()->sync([$roles['employee']->id]);
         $hr->roles()->sync([$roles['hr_manager']->id]);
 

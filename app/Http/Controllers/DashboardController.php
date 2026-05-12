@@ -10,18 +10,29 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
+        // 1. High Priority Roles
         if ($user->hasRole('super_admin') || $user->hasRole('admin')) {
-            return redirect()->route('admin.dashboard');
+            return (new \App\Http\Controllers\Admin\DashboardController())->index();
         }
 
         if ($user->hasRole('hr_manager')) {
-            return redirect()->route('hr.dashboard');
+            return (new \App\Http\Controllers\Hr\DashboardController())->index();
         }
 
+        // 2. Manager Role
         if ($user->hasRole('manager')) {
-            return redirect()->route('manager.dashboard');
+            return (new \App\Http\Controllers\Manager\DashboardController())->index();
         }
 
-        return redirect()->route('employee.dashboard');
+        // 3. Employee Fallback
+        if ($user->hasRole('employee')) {
+            return (new \App\Http\Controllers\Employee\LeaveDashboardController(
+                app(\App\Services\LeaveBalanceService::class),
+                app(\App\Services\LeaveDashboardService::class)
+            ))->index($request);
+        }
+
+        // 4. Final Fallback (Security)
+        abort(403, 'Unauthorized dashboard access. Please contact your administrator.');
     }
 }
