@@ -8,15 +8,19 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AuditLog extends Model
 {
-    protected $fillable = ['actor_id', 'action', 'auditable_type', 'auditable_id', 'data', 'ip_address', 'user_agent'];
-
-    protected $casts = [
-        'data' => 'array',
+    protected $fillable = [
+        'user_id', 'event', 'auditable_type', 'auditable_id', 'action',
+        'old_values', 'new_values', 'ip_address', 'url', 'company_id',
     ];
 
-    public function actor(): BelongsTo
+    protected $casts = [
+        'old_values' => 'array',
+        'new_values' => 'array',
+    ];
+
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'actor_id');
+        return $this->belongsTo(User::class);
     }
 
     public function auditable(): MorphTo

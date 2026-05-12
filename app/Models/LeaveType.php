@@ -55,4 +55,19 @@ class LeaveType extends Model
     {
         return $this->hasMany(LeavePolicy::class);
     }
+
+    public function accrualPlans(): HasMany
+    {
+        return $this->hasMany(AccrualPlan::class);
+    }
+
+    public function requiresManagerApproval(): bool
+    {
+        return in_array($this->validation_type, ['manager', 'both'], true);
+    }
+
+    public function requiresHrApproval(): bool
+    {
+        return in_array($this->validation_type, ['hr', 'both'], true);
+    }
 }

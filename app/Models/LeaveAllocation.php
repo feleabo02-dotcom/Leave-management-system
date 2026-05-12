@@ -16,13 +16,27 @@ class LeaveAllocation extends Model
         'carried_over_days',
         'expires_at',
         'notes',
+        'allocation_type',
+        'accrual_plan_id',
+        'last_accrual_date',
+        'next_accrual_date',
+        'yearly_accrued_amount',
+        'expiring_carryover_days',
+        'carried_over_expiration',
+        'total_allocated_days',
     ];
 
     protected $casts = [
         'expires_at' => 'date',
+        'last_accrual_date' => 'date',
+        'next_accrual_date' => 'date',
+        'carried_over_expiration' => 'date',
         'allocated_days' => 'decimal:2',
         'used_days' => 'decimal:2',
         'carried_over_days' => 'decimal:2',
+        'yearly_accrued_amount' => 'decimal:2',
+        'expiring_carryover_days' => 'decimal:2',
+        'total_allocated_days' => 'decimal:2',
     ];
 
     public function user(): BelongsTo
@@ -33,5 +47,15 @@ class LeaveAllocation extends Model
     public function leaveType(): BelongsTo
     {
         return $this->belongsTo(LeaveType::class);
+    }
+
+    public function accrualPlan(): BelongsTo
+    {
+        return $this->belongsTo(AccrualPlan::class);
+    }
+
+    public function getRemainingDaysAttribute(): float
+    {
+        return (float) max(0, ($this->total_allocated_days ?: $this->allocated_days + $this->carried_over_days) - $this->used_days);
     }
 }
