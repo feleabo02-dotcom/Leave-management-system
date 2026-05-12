@@ -1,0 +1,75 @@
+name: Deploy to InfinityFree
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, dom, fileinfo, pdo, pdo_mysql, bcmath, json, xml, curl
+          coverage: none
+
+      - name: Install composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress --no-dev --optimize-autoloader
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install npm dependencies and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Create production .env
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+      - name: Prepare InfinityFree directory structure
+        run: |
+          mkdir -p deploy/laravel deploy/htdocs
+          rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' \
+            --exclude='tests' --exclude='deploy' --exclude='storage/logs/*' \
+            --exclude='storage/framework/cache/data/*' --exclude='.env' \
+            . deploy/laravel/
+          rsync -a public/ deploy/htdocs/
+
+      - name: Write InfinityFree htdocs/index.php
+        run: |
+          cat > deploy/htdocs/index.php << 'PHPEOF'
+          <?php
+          use Illuminate\Http\Request;
+          define('LARAVEL_START', microtime(true));
+          if (file_exists($maintenance = __DIR__.'/../laravel/storage/framework/maintenance.php')) {
+              require $maintenance;
+          }
+          require __DIR__.'/../laravel/vendor/autoload.php';
+          $app = require_once __DIR__.'/../laravel/bootstrap/app.php';
+          $app->handleRequest(Request::capture());
+          PHPEOF
+
+      - name: Upload via FTP to InfinityFree
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: deploy/
+          server-dir: /
+          dangerous-clean-slate: true

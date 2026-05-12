@@ -10,20 +10,6 @@ jobs:
   laravel:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_DATABASE: HRLeave_test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
       - uses: actions/checkout@v4
 
@@ -31,7 +17,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
-          extensions: mbstring, dom, fileinfo, mysql, pdo, pdo_mysql, bcmath, json, xml, curl
+          extensions: mbstring, dom, fileinfo, pdo, pdo_mysql, bcmath, json, xml, curl
           coverage: none
 
       - name: Get composer cache directory
@@ -53,25 +39,8 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
-      - name: Run database migrations
-        run: php artisan migrate --env=testing --force
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: HRLeave_test
-          DB_USERNAME: root
-          DB_PASSWORD: ""
-
       - name: Run PHPUnit tests
         run: php artisan test
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: HRLeave_test
-          DB_USERNAME: root
-          DB_PASSWORD: ""
 
       - name: Run Laravel Pint (code style)
         run: vendor/bin/pint --test
