@@ -130,7 +130,6 @@
                         ['route' => 'accounting.taxes',        'icon' => 'ph-percent',            'label' => 'Taxes'],
                         ['route' => 'assets.index',            'icon' => 'ph-cube',               'label' => 'Asset Mgmt'],
                         ['route' => 'assets.my',               'icon' => 'ph-laptop',             'label' => 'My Assets'],
-                        ['route' => 'assets.depreciation',     'icon' => 'ph-trend-down',         'label' => 'Depreciation'],
                         ['route' => 'assets.maintenance',      'icon' => 'ph-wrench',             'label' => 'Maintenance'],
                     ]
                 ],
