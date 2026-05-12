@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Services\LeaveBalanceService;
 use App\Services\LeaveRequestService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -23,6 +24,34 @@ class LeaveRequestController extends Controller
             ->get();
 
         return view('erp.employee.requests', compact('leaveTypes', 'requests'));
+    }
+
+    public function create(Request $request): View
+    {
+        $user = $request->user();
+        $leaveTypes = LeaveType::query()->where('active', '=', true)->get();
+        $balanceService = app(LeaveBalanceService::class);
+        $year = now()->year;
+
+        $balances = $leaveTypes->map(function ($type) use ($user, $balanceService, $year) {
+            $remaining = $balanceService->getRemaining($user, $type, $year);
+            $allocation = $balanceService->getAllocation($user, $type, $year);
+            $allocated = $allocation?->allocated_days ?? 0;
+
+            if ($type->allocation_type === 'accrual') {
+                $allocated = $balanceService->calculateAccruedDays($type);
+            }
+
+            return (object) [
+                'type' => $type,
+                'remaining' => $remaining,
+                'allocated' => $allocated,
+            ];
+        });
+
+        $hoursPerDay = $balanceService->getHoursPerDay();
+
+        return view('erp.employee.leave.create', compact('leaveTypes', 'balances', 'hoursPerDay'));
     }
 
     public function store(Request $request, LeaveRequestService $service): RedirectResponse
@@ -50,6 +79,6 @@ class LeaveRequestController extends Controller
             $data['half_day_period'] ?? null
         );
 
-        return back()->with('status', 'request-submitted');
+        return redirect()->route('employee.requests')->with('status', 'request-submitted');
     }
 }
