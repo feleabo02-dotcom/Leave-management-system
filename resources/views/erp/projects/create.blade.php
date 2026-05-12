@@ -1,0 +1,52 @@
+<x-layouts.erp :title="'New Project'">
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{{ route('projects.index') }}" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition">
+            <i class="ph ph-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Create New Project</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Set up a new project with manager and status.</p>
+        </div>
+    </div>
+
+    <form action="{{ route('projects.store') }}" method="POST" class="max-w-2xl bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        @csrf
+        <div class="p-6 border-b border-gray-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Project Name *</label>
+                    <input type="text" name="name" required value="{{ old('name') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g. Website Redesign">
+                    @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Project Code *</label>
+                    <input type="text" name="code" required value="{{ old('code') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g. PRJ-001">
+                    @error('code') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Project Manager</label>
+                    <select name="manager_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white">
+                        <option value="">Select Manager</option>
+                        @foreach($managers as $mgr)
+                            <option value="{{ $mgr->id }}" {{ old('manager_id') == $mgr->id ? 'selected' : '' }}>{{ $mgr->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('manager_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white">
+                        <option value="draft" {{ old('status', 'draft') === 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="closed" {{ old('status') === 'closed' ? 'selected' : '' }}>Closed</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 py-4 bg-white flex justify-end gap-3">
+            <a href="{{ route('projects.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">Cancel</a>
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition shadow-sm">Create Project</button>
+        </div>
+    </form>
+</x-layouts.erp>
