@@ -1,167 +1,267 @@
-<x-app-layout title="Admin Control Center" panel="admin">
-    <div class="grid gap-6 erp-stagger">
-        <section class="grid gap-4 lg:grid-cols-4">
-            <div class="erp-kpi">
-                <p class="erp-label">Active employees</p>
-                <div class="flex items-end justify-between">
-                    <span class="text-3xl font-semibold font-display">412</span>
-                    <span class="erp-badge erp-badge-success">+12</span>
-                </div>
-                <p class="text-xs text-base-500">Across 8 departments.</p>
-            </div>
-            <div class="erp-kpi">
-                <p class="erp-label">Leave types</p>
-                <div class="flex items-end justify-between">
-                    <span class="text-3xl font-semibold font-display">9</span>
-                    <span class="erp-badge">Configured</span>
-                </div>
-                <p class="text-xs text-base-500">Policies audited this quarter.</p>
-            </div>
-            <div class="erp-kpi">
-                <p class="erp-label">Allocations</p>
-                <div class="flex items-end justify-between">
-                    <span class="text-3xl font-semibold font-display">98%</span>
-                    <span class="erp-badge erp-badge-info">Coverage</span>
-                </div>
-                <p class="text-xs text-base-500">Auto-allocation completed.</p>
-            </div>
-            <div class="erp-kpi">
-                <p class="erp-label">Audit logs</p>
-                <div class="flex items-end justify-between">
-                    <span class="text-3xl font-semibold font-display">1.4k</span>
-                    <span class="erp-badge erp-badge-warning">7 alerts</span>
-                </div>
-                <p class="text-xs text-base-500">Security and policy events.</p>
-            </div>
-        </section>
+<x-layouts.erp :title="'Admin Dashboard'">
+    {{-- Include Lucide Icons --}}
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-        <section class="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-            <div class="erp-card p-6">
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <p class="erp-label">System control</p>
-                        <h2 class="mt-2 text-xl font-semibold">Leave type management</h2>
-                    </div>
-                    <button class="erp-button">Add leave type</button>
+    {{-- Summary Row --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {{-- Attendance Card --}}
+        <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-3">
+                <div class="p-2 bg-blue-50 rounded-lg">
+                    <i data-lucide="users" class="w-5 h-5 text-blue-600"></i>
                 </div>
-                <table class="erp-table mt-6">
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Paid</th>
-                            <th>Approval</th>
-                            <th>Carry forward</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Annual Leave</td>
-                            <td>Yes</td>
-                            <td>Required</td>
-                            <td>Up to 5 days</td>
-                            <td><span class="erp-badge erp-badge-success">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>Sick Leave</td>
-                            <td>Yes</td>
-                            <td>Required</td>
-                            <td>No</td>
-                            <td><span class="erp-badge erp-badge-success">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>Remote Day</td>
-                            <td>Yes</td>
-                            <td>Auto</td>
-                            <td>No</td>
-                            <td><span class="erp-badge">Limited</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Live</span>
             </div>
+            <p class="text-2xl font-bold text-slate-900">{{ number_format($currentAttendance) }}</p>
+            <p class="text-xs text-slate-500 font-medium mt-1">Current Attendance</p>
+        </div>
 
-            <div class="space-y-6">
-                <div class="erp-card p-6">
-                    <p class="erp-label">Allocation engine</p>
-                    <h3 class="mt-2 text-lg font-semibold">Next auto-run</h3>
-                    <p class="mt-3 text-sm text-base-500">Scheduled for Mar 1, 2026.</p>
-                    <div class="mt-4 rounded-xl border border-base-100/70 bg-base-0/70 px-4 py-3 text-sm">
-                        98% of employees already allocated.
-                    </div>
-                    <button class="erp-button mt-4 w-full">Run allocation now</button>
+        {{-- Active Tasks --}}
+        <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-3">
+                <div class="p-2 bg-indigo-50 rounded-lg">
+                    <i data-lucide="check-square" class="w-5 h-5 text-indigo-600"></i>
                 </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Operational</span>
+            </div>
+            <p class="text-2xl font-bold text-slate-900">{{ number_format($activeTasks) }}</p>
+            <p class="text-xs text-slate-500 font-medium mt-1">Active Tasks</p>
+        </div>
 
-                <div class="erp-card p-6">
-                    <p class="erp-label">Security</p>
-                    <h3 class="mt-2 text-lg font-semibold">Role & permission audit</h3>
-                    <ul class="mt-4 space-y-3 text-sm text-base-600">
-                        <li class="flex items-center justify-between rounded-xl border border-base-100/70 bg-base-0/70 px-4 py-3">
-                            <span>Admin roles</span>
-                            <span class="erp-badge erp-badge-info">12 users</span>
-                        </li>
-                        <li class="flex items-center justify-between rounded-xl border border-base-100/70 bg-base-0/70 px-4 py-3">
-                            <span>Pending access requests</span>
-                            <span class="erp-badge erp-badge-warning">4</span>
-                        </li>
-                    </ul>
+        {{-- Monthly Revenue --}}
+        <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-3">
+                <div class="p-2 bg-emerald-50 rounded-lg">
+                    <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
                 </div>
+                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded text-xs">MTD</span>
             </div>
-        </section>
+            <p class="text-2xl font-bold text-slate-900">${{ number_format($monthlyRevenue, 0) }}</p>
+            <p class="text-xs text-slate-500 font-medium mt-1">Monthly Revenue</p>
+        </div>
 
-        <section class="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-            <div class="erp-card p-6">
-                <p class="erp-label">User management</p>
-                <h3 class="mt-2 text-lg font-semibold">Recent hires</h3>
-                <table class="erp-table mt-4">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Department</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>A. Kim</td>
-                            <td>Engineering</td>
-                            <td>Employee</td>
-                            <td><span class="erp-badge erp-badge-info">Onboarding</span></td>
-                        </tr>
-                        <tr>
-                            <td>L. Brown</td>
-                            <td>Design</td>
-                            <td>Manager</td>
-                            <td><span class="erp-badge erp-badge-success">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>E. Patel</td>
-                            <td>Finance</td>
-                            <td>Employee</td>
-                            <td><span class="erp-badge">Pending</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="erp-card p-6">
-                <p class="erp-label">Settings</p>
-                <h3 class="mt-2 text-lg font-semibold">System toggles</h3>
-                <div class="mt-4 space-y-3 text-sm text-base-600">
-                    <label class="flex items-center justify-between rounded-2xl border border-base-100/70 bg-base-0/70 px-4 py-3">
-                        <span>Multi-level approvals</span>
-                        <input type="checkbox" checked class="h-4 w-4 rounded border-base-200 text-brand-600 focus:ring-brand-400" />
-                    </label>
-                    <label class="flex items-center justify-between rounded-2xl border border-base-100/70 bg-base-0/70 px-4 py-3">
-                        <span>Auto-allocation</span>
-                        <input type="checkbox" checked class="h-4 w-4 rounded border-base-200 text-brand-600 focus:ring-brand-400" />
-                    </label>
-                    <label class="flex items-center justify-between rounded-2xl border border-base-100/70 bg-base-0/70 px-4 py-3">
-                        <span>Carry-forward enforcement</span>
-                        <input type="checkbox" class="h-4 w-4 rounded border-base-200 text-brand-600 focus:ring-brand-400" />
-                    </label>
+        {{-- Inventory Alerts --}}
+        <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-3">
+                <div class="p-2 bg-rose-50 rounded-lg">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600"></i>
                 </div>
+                @if($inventoryAlerts > 0)
+                    <span class="flex h-2 w-2 rounded-full bg-rose-500 animate-ping"></span>
+                @endif
             </div>
-        </section>
+            <p class="text-2xl font-bold text-slate-900">{{ $inventoryAlerts }}</p>
+            <p class="text-xs text-slate-500 font-medium mt-1">Inventory Alerts</p>
+        </div>
     </div>
-</x-app-layout>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+        {{-- Large Section: Sales vs Expenses --}}
+        <div class="xl:col-span-2 bg-white border border-slate-200 rounded-lg shadow-sm">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Performance Dynamics</h3>
+                <div class="flex items-center gap-4 text-xs font-bold">
+                    <div class="flex items-center gap-1.5 text-indigo-600">
+                        <span class="w-3 h-3 rounded-sm bg-indigo-600"></span> Sales
+                    </div>
+                    <div class="flex items-center gap-1.5 text-slate-400">
+                        <span class="w-3 h-3 rounded-sm bg-slate-200"></span> Expenses
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 h-[400px]">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+
+        {{-- NEW: Revenue Distribution (Circle Bar/Doughnut) --}}
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm">
+            <div class="px-6 py-5 border-b border-slate-100">
+                <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Revenue Sources</h3>
+            </div>
+            <div class="p-6 flex flex-col items-center justify-center h-[400px]">
+                <div class="w-full h-full relative">
+                    <canvas id="revenueDonut"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+        {{-- Quick Actions --}}
+        <div class="bg-slate-900 rounded-lg p-6 shadow-xl text-white relative overflow-hidden">
+            <h3 class="font-bold text-xs uppercase tracking-widest text-slate-400 mb-6">Strategic Controls</h3>
+            <div class="grid grid-cols-1 gap-3 relative z-10">
+                <a href="{{ route('employees.create') }}" class="flex items-center gap-3 w-full p-3 bg-white/5 hover:bg-white/10 rounded-lg transition text-sm font-medium border border-white/10">
+                    <i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i>
+                    Provision User
+                </a>
+                <button class="flex items-center gap-3 w-full p-3 bg-white/5 hover:bg-white/10 rounded-lg transition text-sm font-medium border border-white/10 text-left">
+                    <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+                    Issue Statement
+                </button>
+                <button class="flex items-center gap-3 w-full p-3 bg-white/5 hover:bg-white/10 rounded-lg transition text-sm font-medium border border-white/10 text-left">
+                    <i data-lucide="package-plus" class="w-4 h-4 text-amber-400"></i>
+                    Stock Catalog
+                </button>
+            </div>
+            <i data-lucide="settings" class="absolute -right-8 -bottom-8 w-48 h-48 text-white/5 rotate-12"></i>
+        </div>
+
+        {{-- NEW: Project Status (Radial/Horizontal Bar) --}}
+        <div class="xl:col-span-2 bg-white border border-slate-200 rounded-lg shadow-sm">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Operational Load</h3>
+            </div>
+            <div class="p-6 h-[200px]">
+                <canvas id="projectStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{-- Live Attendance Table --}}
+    <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden mb-6">
+        <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Live Attendance Feed</h3>
+            <a href="{{ route('attendance.index') }}" class="text-xs font-bold text-indigo-600 hover:underline">View Log</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50/50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        <th class="px-6 py-4">Employee</th>
+                        <th class="px-6 py-4">Check-In Time</th>
+                        <th class="px-6 py-4">Station</th>
+                        <th class="px-6 py-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @forelse($lastCheckIns as $log)
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">
+                                        {{ strtoupper(substr($log->employee->user->name, 0, 2)) }}
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-900">{{ $log->employee->user->name }}</p>
+                                        <p class="text-[10px] text-slate-500 font-medium">ID: EMP-{{ $log->employee->id }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-600 font-medium">{{ \Carbon\Carbon::parse($log->check_in)->format('H:i:s') }}</td>
+                            <td class="px-6 py-4 text-xs text-slate-400 font-medium">HQ - Central Gate</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-{{ $log->status_color }}-100 text-{{ $log->status_color }}-700">
+                                    {{ $log->status_badge }}
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-slate-400 text-sm italic font-medium">No check-ins recorded for today yet.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Lucide
+            lucide.createIcons();
+
+            // Performance Bar Chart
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($months) !!},
+                    datasets: [
+                        {
+                            label: 'Sales',
+                            data: {!! json_encode($chartSales) !!},
+                            backgroundColor: '#4f46e5',
+                            borderRadius: 4,
+                            barThickness: 32
+                        },
+                        {
+                            label: 'Expenses',
+                            data: {!! json_encode($chartExpenses) !!},
+                            backgroundColor: '#e2e8f0',
+                            borderRadius: 4,
+                            barThickness: 32
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // NEW: Revenue Donut (Circle Bar)
+            const donutCtx = document.getElementById('revenueDonut').getContext('2d');
+            new Chart(donutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($revenueByCategory->pluck('name')) !!},
+                    datasets: [{
+                        data: {!! json_encode($revenueByCategory->pluck('total')) !!},
+                        backgroundColor: ['#4f46e5', '#818cf8', '#c7d2fe', '#e2e8f0', '#f1f5f9'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: { size: 10, weight: 'bold' },
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+
+            // NEW: Project Status Chart (Horizontal Bar as Radial alternative)
+            const statusCtx = document.getElementById('projectStatusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($projectStatusCounts->pluck('status')) !!},
+                    datasets: [{
+                        label: 'Projects',
+                        data: {!! json_encode($projectStatusCounts->pluck('count')) !!},
+                        backgroundColor: '#4f46e5',
+                        borderRadius: 100,
+                        barThickness: 12
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { display: false } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+    </script>
+</x-layouts.erp>
