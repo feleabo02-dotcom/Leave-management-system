@@ -11,6 +11,13 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      NULL_SHA: 0000000000000000000000000000000000000000
+      FTP_EXCLUDE_COMMON: |
+        **/.env
+        core/storage/logs/**
+        core/storage/framework/cache/**
+        core/storage/framework/sessions/**
 
     steps:
       - name: Checkout Code
@@ -79,7 +86,7 @@ jobs:
         id: dependency_changes
         run: |
           BEFORE_SHA="${{ github.event.before }}"
-          if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+          if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "$NULL_SHA" ]; then
             echo "composer_changed=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -103,10 +110,7 @@ jobs:
           # This ensures we don't delete logs or user uploads on the server
           dangerous-clean-slate: false
           exclude: |
-            **/.env
-            core/storage/logs/**
-            core/storage/framework/cache/**
-            core/storage/framework/sessions/**
+            ${{ env.FTP_EXCLUDE_COMMON }}
 
       - name: Deploy to InfinityFree (skip vendor upload)
         if: steps.dependency_changes.outputs.composer_changed == 'false'
@@ -120,8 +124,5 @@ jobs:
           # This ensures we don't delete logs or user uploads on the server
           dangerous-clean-slate: false
           exclude: |
-            **/.env
+            ${{ env.FTP_EXCLUDE_COMMON }}
             core/vendor/**
-            core/storage/logs/**
-            core/storage/framework/cache/**
-            core/storage/framework/sessions/**
