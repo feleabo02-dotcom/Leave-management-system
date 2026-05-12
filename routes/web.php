@@ -95,4 +95,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reports',               fn() => abort(503, 'Coming in Phase 13'))->name('reports.index');
 });
 
-// require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';
