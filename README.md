@@ -1,4 +1,4 @@
-# Leave Management System
+# XobiyaHR
 
 Odoo-inspired, enterprise-grade time off and leave management UI built on Laravel with Tailwind CSS.
 
@@ -38,5 +38,16 @@ Odoo-inspired, enterprise-grade time off and leave management UI built on Larave
 - Employee panel: `/employee`
 - Manager panel: `/manager`
 - Admin panel: `/admin`
+
+## Default Credentials
+All accounts use the password: `password123`
+
+| Role | Email |
+| :--- | :--- |
+| **Super Admin** | `super@hrleave.test` |
+| **Admin** | `admin@hrleave.test` |
+| **HR Manager** | `hr@hrleave.test` |
+| **Manager** | `manager@hrleave.test` |
+| **Employee** | `employee@hrleave.test` |
 
 Authentication is required to access the panels.

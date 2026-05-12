@@ -35,9 +35,9 @@
                 <tbody class="divide-y divide-gray-50">
                     @forelse($orders as $order)
                         <tr class="hover:bg-gray-50 transition">
-                            <td class="px-5 py-4 text-sm font-bold text-gray-900">{{ $order->employee->name ?? '—' }}</td>
-                            <td class="px-5 py-4 text-sm text-gray-600">{{ $order->date?->format('M d, Y') }}</td>
-                            <td class="px-5 py-4 text-sm text-gray-600">{{ $order->items->count() }} item(s)</td>
+                            <td class="px-5 py-4 text-sm font-bold text-gray-900">{{ $order->employee->user->name ?? '—' }}</td>
+                            <td class="px-5 py-4 text-sm text-gray-600">{{ $order->order_date?->format('M d, Y') }}</td>
+                            <td class="px-5 py-4 text-sm text-gray-600">{{ $order->lines->count() }} item(s)</td>
                             <td class="px-5 py-4 text-sm font-bold text-gray-900">${{ number_format($order->total, 2) }}</td>
                             <td class="px-5 py-4">
                                 <span class="px-2 py-0.5 text-[10px] font-bold rounded-full uppercase
@@ -105,7 +105,7 @@
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Employee</label>
                                 <select name="employee_id" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
                                     @foreach($employees as $emp)
-                                        <option value="{{ $emp->id }}">{{ $emp->name }}</option>
+                                        <option value="{{ $emp->id }}">{{ $emp->user->name }}</option>
                                     @endforeach
                                 </select>
                             </div>

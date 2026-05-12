@@ -62,7 +62,7 @@
                                         </div>
                                         <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Duration (hrs)</label>
-                                            <input type="number" step="0.01" name="duration" class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg">
+                                            <input type="number" step="0.01" name="hours" class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg">
                                         </div>
                                         <div class="md:col-span-3 flex justify-end gap-2">
                                             <button type="button" onclick="document.getElementById('addStepForm{{ $routing->id }}').classList.add('hidden')" class="px-3 py-1.5 text-xs border border-gray-300 rounded-lg">Cancel</button>
@@ -84,7 +84,7 @@
                                             <tr>
                                                 <td class="py-1.5 pr-4 text-sm text-gray-700">{{ $step->name }}</td>
                                                 <td class="py-1.5 pr-4 text-sm text-gray-700">{{ $step->workCenter->name ?? '—' }}</td>
-                                                <td class="py-1.5 pr-4 text-sm text-gray-700">{{ $step->duration }} hrs</td>
+                                                <td class="py-1.5 pr-4 text-sm text-gray-700">{{ $step->hours }} hrs</td>
                                             </tr>
                                         @empty
                                             <tr>

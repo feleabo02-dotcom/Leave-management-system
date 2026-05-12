@@ -14,19 +14,19 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Total Invoices</p>
-            <p class="text-2xl font-bold text-gray-900">{{ \App\Models\Invoice::count() }}</p>
+            <p class="text-2xl font-bold text-gray-900">{{ \App\Models\AccountInvoice::count() }}</p>
         </div>
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Draft</p>
-            <p class="text-2xl font-bold text-gray-600">{{ \App\Models\Invoice::where('status', 'draft')->count() }}</p>
+            <p class="text-2xl font-bold text-gray-600">{{ \App\Models\AccountInvoice::where('status', 'draft')->count() }}</p>
         </div>
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Posted</p>
-            <p class="text-2xl font-bold text-orange-600">{{ \App\Models\Invoice::where('status', 'posted')->count() }}</p>
+            <p class="text-2xl font-bold text-orange-600">{{ \App\Models\AccountInvoice::where('status', 'posted')->count() }}</p>
         </div>
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Paid</p>
-            <p class="text-2xl font-bold text-green-600">{{ \App\Models\Invoice::where('status', 'paid')->count() }}</p>
+            <p class="text-2xl font-bold text-green-600">{{ \App\Models\AccountInvoice::where('status', 'paid')->count() }}</p>
         </div>
     </div>
 
@@ -135,8 +135,8 @@
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Partner</label>
                                 <select name="partner_id" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
-                                    @foreach($partners as $partner)
-                                        <option value="{{ $partner->id }}">{{ $partner->name }}</option>
+                                    @foreach($customers as $customer)
+                                        <option value="{{ $customer->id }}">{{ $customer->name }}</option>
                                     @endforeach
                                 </select>
                             </div>

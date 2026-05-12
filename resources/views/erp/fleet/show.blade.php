@@ -103,11 +103,11 @@
                     <div class="p-5">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
-                                {{ strtoupper(substr($vehicle->driver->name, 0, 2)) }}
+                                {{ strtoupper(substr($vehicle->driver->user->name, 0, 2)) }}
                             </div>
                             <div>
-                                <p class="text-sm font-bold text-gray-900">{{ $vehicle->driver->name }}</p>
-                                <p class="text-xs text-gray-500">{{ $vehicle->driver->license_number ?? '—' }}</p>
+                                <p class="text-sm font-bold text-gray-900">{{ $vehicle->driver->user->name }}</p>
+                                <p class="text-xs text-gray-500">{{ $vehicle->driver->employee_code ?? '—' }}</p>
                             </div>
                         </div>
                     </div>
@@ -185,7 +185,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
-                            @forelse($vehicle->services as $service)
+                            @forelse($vehicle->serviceLogs as $service)
                                 <tr class="hover:bg-gray-50 transition">
                                     <td class="px-5 py-3 text-sm capitalize text-gray-900 font-medium">{{ $service->type }}</td>
                                     <td class="px-5 py-3 text-sm text-gray-600">{{ $service->description }}</td>

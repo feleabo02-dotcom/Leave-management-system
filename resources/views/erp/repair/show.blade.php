@@ -80,7 +80,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Assignee</p>
-                        <p class="text-sm font-medium text-gray-900">{{ $order->assignedTo->name ?? '—' }}</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $order->assignee->name ?? '—' }}</p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Date Requested</p>

@@ -51,8 +51,8 @@
                                 </span>
                             </td>
                             <td class="px-5 py-4 text-sm text-gray-600">{{ $run->payslips->count() ?? 0 }}</td>
-                            <td class="px-5 py-4 text-sm font-medium text-gray-900">${{ number_format($run->gross_total ?? 0, 2) }}</td>
-                            <td class="px-5 py-4 text-sm font-bold text-gray-900">${{ number_format($run->net_total ?? 0, 2) }}</td>
+                            <td class="px-5 py-4 text-sm font-medium text-gray-900">${{ number_format($run->total_gross ?? 0, 2) }}</td>
+                            <td class="px-5 py-4 text-sm font-bold text-gray-900">${{ number_format($run->total_net ?? 0, 2) }}</td>
                             <td class="px-5 py-4 text-right">
                                 <div class="flex justify-end gap-1">
                                     @if($run->status === 'draft')

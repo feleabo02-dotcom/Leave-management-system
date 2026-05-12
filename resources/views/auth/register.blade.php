@@ -20,10 +20,17 @@
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+            <div class="relative mt-1" x-data="{ show: false }">
+                <x-text-input id="password" class="block w-full pr-10"
+                                type="password"
+                                x-bind:type="show ? 'text' : 'password'"
+                                name="password"
+                                required autocomplete="new-password" />
+                
+                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-indigo-600 transition">
+                    <i class="ph" :class="show ? 'ph-eye-slash' : 'ph-eye'"></i>
+                </button>
+            </div>
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -32,9 +39,16 @@
         <div class="mt-4">
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
+            <div class="relative mt-1" x-data="{ show: false }">
+                <x-text-input id="password_confirmation" class="block w-full pr-10"
+                                type="password"
+                                x-bind:type="show ? 'text' : 'password'"
+                                name="password_confirmation" required autocomplete="new-password" />
+                
+                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-indigo-600 transition">
+                    <i class="ph" :class="show ? 'ph-eye-slash' : 'ph-eye'"></i>
+                </button>
+            </div>
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>

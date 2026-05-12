@@ -53,7 +53,7 @@
                             <td class="px-5 py-4 text-sm text-gray-600">{{ $maint->scheduled_date?->format('M d, Y') ?? '—' }}</td>
                             <td class="px-5 py-4 text-sm text-gray-600">{{ $maint->completed_date?->format('M d, Y') ?? '—' }}</td>
                             <td class="px-5 py-4 text-sm text-gray-900">${{ number_format($maint->cost, 2) }}</td>
-                            <td class="px-5 py-4 text-sm text-gray-600">{{ $maint->assignedTo->name ?? '—' }}</td>
+                            <td class="px-5 py-4 text-sm text-gray-600">{{ $maint->assignee->user->name ?? '—' }}</td>
                             <td class="px-5 py-4 text-right">
                                 @if($maint->status !== 'completed')
                                     <form action="{{ route('assets.maintenance.complete', $maint) }}" method="POST" class="inline">
@@ -117,7 +117,7 @@
                                 <select name="assigned_to" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
                                     <option value="">Select</option>
                                     @foreach($employees as $emp)
-                                        <option value="{{ $emp->id }}">{{ $emp->name }}</option>
+                                        <option value="{{ $emp->id }}">{{ $emp->user->name }}</option>
                                     @endforeach
                                 </select>
                             </div>

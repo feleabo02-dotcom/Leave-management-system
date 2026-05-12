@@ -85,7 +85,7 @@
                     @forelse($orders as $order)
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-5 py-3 text-sm font-medium text-gray-900">{{ $order->employee->name ?? '—' }}</td>
-                            <td class="px-5 py-3 text-sm text-gray-600">{{ $order->date?->format('M d, Y') }}</td>
+                            <td class="px-5 py-3 text-sm text-gray-600">{{ $order->order_date?->format('M d, Y') }}</td>
                             <td class="px-5 py-3 text-sm font-medium text-gray-900">${{ number_format($order->total, 2) }}</td>
                             <td class="px-5 py-3">
                                 <span class="px-2 py-0.5 text-[10px] font-bold rounded-full uppercase

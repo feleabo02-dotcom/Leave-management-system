@@ -19,7 +19,7 @@ class LeaveDashboardController extends Controller
         private LeaveDashboardService $dashboardService,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = $request->user();
         $year = (int) ($request->get('year', now()->year));
@@ -51,6 +51,7 @@ class LeaveDashboardController extends Controller
 
         // 1. Weekly Attendance (Bar Chart)
         $startOfWeek = now()->startOfWeek();
+        if (!$user->employee) return redirect()->back()->with('error', 'No employee record linked.');
         $attendanceData = Attendance::where('employee_id', $user->employee->id)
             ->whereBetween('check_in', [$startOfWeek, now()->endOfWeek()])
             ->selectRaw('strftime("%w", check_in) as day, COUNT(*) as count')

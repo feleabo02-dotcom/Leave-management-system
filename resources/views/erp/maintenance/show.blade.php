@@ -120,7 +120,7 @@
                                             {{ str_replace('_', ' ', $req->status) }}
                                         </span>
                                     </td>
-                                    <td class="px-5 py-3 text-sm text-gray-600">{{ $req->assignedTo->name ?? '—' }}</td>
+                                    <td class="px-5 py-3 text-sm text-gray-600">{{ $req->assignee->user->name ?? '—' }}</td>
                                     <td class="px-5 py-3 text-sm text-gray-600">{{ $req->scheduled_date?->format('M d, Y') ?? '—' }}</td>
                                 </tr>
                             @empty

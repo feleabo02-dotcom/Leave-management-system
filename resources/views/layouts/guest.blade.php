@@ -13,16 +13,18 @@
         <link href="https://fonts.bunny.net/css?family=source+sans+3:400,500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
+        <script src="https://unpkg.com/@phosphor-icons/web"></script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-base-900 antialiased">
         <div class="min-h-screen erp-backdrop flex flex-col items-center justify-center px-4 py-12">
             <div class="mb-8 text-center">
-                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-soft">
-                    <span class="text-xl font-bold">LM</span>
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-soft">
+                    <span class="text-xl font-bold">X</span>
                 </div>
-                <h1 class="mt-4 text-2xl font-semibold">LeaveSphere</h1>
-                <p class="mt-2 text-sm text-base-500">Enterprise-grade time off management</p>
+                <h1 class="mt-4 text-2xl font-semibold">XobiyaHR</h1>
+                <p class="mt-2 text-sm text-base-500">Welcome to XobiyaHR</p>
+                <p class="mt-1 text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Powered by PowerShower</p>
             </div>
 
             <div class="w-full max-w-md rounded-2xl border border-base-100/70 bg-base-0/85 p-6 shadow-glass backdrop-blur dark:border-base-200/40 dark:bg-base-0/10">

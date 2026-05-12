@@ -73,7 +73,7 @@
                             <td class="px-5 py-4 text-sm text-gray-600">
                                 {{ $order->date_requested?->format('M d, Y') ?? '—' }}
                             </td>
-                            <td class="px-5 py-4 text-sm text-gray-600">{{ $order->assignedTo->name ?? '—' }}</td>
+                            <td class="px-5 py-4 text-sm text-gray-600">{{ $order->assignee->name ?? '—' }}</td>
                             <td class="px-5 py-4 text-right">
                                 <a href="{{ route('repair.show', $order) }}" class="text-gray-400 hover:text-indigo-600 transition p-1.5 inline-block"><i class="ph ph-eye text-lg"></i></a>
                             </td>

@@ -14,15 +14,15 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Total Equipment</p>
-            <p class="text-2xl font-bold text-gray-900">{{ \App\Models\Equipment::count() }}</p>
+            <p class="text-2xl font-bold text-gray-900">{{ \App\Models\MaintenanceEquipment::count() }}</p>
         </div>
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Operating</p>
-            <p class="text-2xl font-bold text-green-600">{{ \App\Models\Equipment::where('status', 'operating')->count() }}</p>
+            <p class="text-2xl font-bold text-green-600">{{ \App\Models\MaintenanceEquipment::where('status', 'operating')->count() }}</p>
         </div>
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Under Maintenance</p>
-            <p class="text-2xl font-bold text-orange-600">{{ \App\Models\Equipment::where('status', 'under_maintenance')->count() }}</p>
+            <p class="text-2xl font-bold text-orange-600">{{ \App\Models\MaintenanceEquipment::where('status', 'under_maintenance')->count() }}</p>
         </div>
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Open Requests</p>
@@ -112,7 +112,7 @@
                                 </span>
                             </td>
                             <td class="px-5 py-3 text-sm capitalize text-gray-600">{{ $req->stage ?? $req->status }}</td>
-                            <td class="px-5 py-3 text-sm text-gray-600">{{ $req->assignedTo->name ?? '—' }}</td>
+                            <td class="px-5 py-3 text-sm text-gray-600">{{ $req->assignee->user->name ?? '—' }}</td>
                             <td class="px-5 py-3 text-sm text-gray-600">
                                 {{ $req->scheduled_date?->format('M d, Y') ?? '—' }}
                             </td>

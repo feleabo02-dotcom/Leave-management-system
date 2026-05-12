@@ -110,7 +110,7 @@
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Equipment</label>
                                 <select name="equipment_id" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
-                                    @foreach(\App\Models\Equipment::all() as $eq)
+                                    @foreach(\App\Models\MaintenanceEquipment::all() as $eq)
                                         <option value="{{ $eq->id }}">{{ $eq->name }}</option>
                                     @endforeach
                                 </select>

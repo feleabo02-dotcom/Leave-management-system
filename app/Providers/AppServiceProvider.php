@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Employee;
+use App\Models\User;
 use App\Observers\EmployeeObserver;
 use App\Models\LeaveRequest;
 use App\Policies\LeaveRequestPolicy;
@@ -32,8 +33,10 @@ class AppServiceProvider extends ServiceProvider
         $modules = [
             'employees', 'attendance', 'leave', 'payroll', 'assets',
             'inventory', 'procurement', 'crm', 'sales', 'accounting',
-            'manufacturing', 'projects', 'helpdesk', 'reports',
+            'manufacturing', 'projects', 'helpdesk', 'recruitment', 'reports',
             'companies', 'settings', 'users', 'roles',
+            'skills', 'gamification', 'expenses',
+            'fleet', 'maintenance', 'lunch', 'repair', 'reports',
         ];
 
         $actions = ['create', 'read', 'update', 'delete', 'approve', 'export'];
