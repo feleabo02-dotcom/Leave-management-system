@@ -38,12 +38,13 @@
     class="fixed inset-y-0 left-0 z-40 flex flex-col bg-gray-900 text-white transition-all duration-300"
     :class="sidebarOpen ? 'w-64' : 'w-16'"
 >
-    {{-- Logo --}}
-    <div class="flex items-center gap-3 px-4 py-5 border-b border-gray-800 overflow-hidden">
-        <div class="w-8 h-8 flex-shrink-0 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-900/20">
+    {{-- Logo acting as Toggle --}}
+    <div @click="sidebarOpen = !sidebarOpen" 
+         class="flex items-center gap-3 px-4 py-5 border-b border-gray-800 overflow-hidden cursor-pointer hover:bg-gray-800/50 transition-colors group">
+        <div class="w-8 h-8 flex-shrink-0 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-900/20 group-hover:scale-110 transition-transform">
             <i class="ph ph-cube text-white text-lg"></i>
         </div>
-        <span x-show="sidebarOpen" x-transition class="font-bold text-lg tracking-tight whitespace-nowrap">
+        <span x-show="sidebarOpen" x-transition class="font-bold text-lg tracking-tight whitespace-nowrap text-white group-hover:text-indigo-400 transition-colors">
             {{ config('app.name', 'XobiyaHR') }}
         </span>
     </div>
@@ -291,11 +292,8 @@
     <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
         <div class="flex items-center justify-between h-16 px-6">
             {{-- Left: toggle + breadcrumb --}}
+            {{-- Left: Logo/Toggle context removed from here, integrated into sidebar logo --}}
             <div class="flex items-center gap-4">
-                <button @click="sidebarOpen = !sidebarOpen"
-                        class="text-gray-500 hover:text-indigo-600 p-2 rounded-lg hover:bg-gray-100 transition shadow-sm bg-white border border-gray-200">
-                    <i class="ph ph-list text-xl"></i>
-                </button>
 
                 {{-- Breadcrumbs --}}
                 <nav class="hidden md:flex items-center gap-2 text-sm text-gray-500">
