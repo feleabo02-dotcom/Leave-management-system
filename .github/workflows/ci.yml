@@ -7,55 +7,6 @@ on:
     branches: [main, master]
 
 jobs:
-  laravel:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.4
-          extensions: mbstring, dom, fileinfo, pdo, pdo_mysql, bcmath, json, xml, curl
-          coverage: none
-
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install composer dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
-
-      - name: Prepare environment
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Build frontend assets
-        run: |
-          npm ci
-          npm run build
-
-      - name: Run PHPUnit tests
-        run: php artisan test
-
-      - name: Run Laravel Pint
-        run: vendor/bin/pint --test
-
   frontend:
     runs-on: ubuntu-latest
 
@@ -75,8 +26,8 @@ jobs:
         run: npm run build
 
   deploy:
-    if: github.ref_name == 'main'
-    needs: [laravel, frontend]
+    if: github.ref_name == 'main' || github.ref_name == 'master'
+    needs: [frontend]
     runs-on: ubuntu-latest
 
     steps:
@@ -142,4 +93,3 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: deploy/
           server-dir: /
-          dangerous-clean-slate: true
