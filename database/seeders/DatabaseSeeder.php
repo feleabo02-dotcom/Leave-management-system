@@ -6,7 +6,6 @@ use App\Models\Department;
 use App\Models\LeaveAllocation;
 use App\Models\LeavePolicy;
 use App\Models\LeaveType;
-use App\Models\Permission;
 use App\Models\Role;
 use App\Models\SystemSetting;
 use App\Models\User;
@@ -19,33 +18,18 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
+        $this->call(RolePermissionSeeder::class);
+
         $defaultPassword = Hash::make('password123');
 
         $roles = [
-            'admin' => Role::query()->updateOrCreate(['slug' => 'admin'], ['name' => 'Admin']),
-            'manager' => Role::query()->updateOrCreate(['slug' => 'manager'], ['name' => 'Manager']),
-            'employee' => Role::query()->updateOrCreate(['slug' => 'employee'], ['name' => 'Employee']),
-            'hr' => Role::query()->updateOrCreate(['slug' => 'hr'], ['name' => 'HR']),
+            'super_admin' => Role::where('slug', 'super_admin')->first(),
+            'admin'       => Role::where('slug', 'admin')->first(),
+            'employee'    => Role::where('slug', 'employee')->first(),
+            'hr_manager'  => Role::where('slug', 'hr_manager')->first(),
         ];
-
-        $permissions = [
-            'manage-leave-types',
-            'manage-allocations',
-            'approve-requests',
-            'view-reports',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::query()->updateOrCreate(
-                ['slug' => $permission],
-                ['name' => ucwords(str_replace('-', ' ', $permission))],
-            );
-        }
 
         $departments = Department::query()->updateOrCreate(
             ['code' => 'HR'],
@@ -69,6 +53,24 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Hours per working day',
             ],
         );
+
+        // ── Seed positions ─────────────────────────────────────────────────────
+        $positions = [
+            ['title' => 'Chief Executive Officer', 'department_id' => null, 'level' => 10],
+            ['title' => 'Chief Technology Officer', 'department_id' => null, 'level' => 9],
+            ['title' => 'HR Director', 'department_id' => $departments->id, 'level' => 8],
+            ['title' => 'Senior Developer', 'department_id' => null, 'level' => 6],
+            ['title' => 'Junior Developer', 'department_id' => null, 'level' => 3],
+            ['title' => 'HR Officer', 'department_id' => $departments->id, 'level' => 4],
+            ['title' => 'Accountant', 'department_id' => null, 'level' => 5],
+        ];
+
+        foreach ($positions as $pos) {
+            \App\Models\Position::query()->updateOrCreate(
+                ['title' => $pos['title']],
+                $pos,
+            );
+        }
 
         $leaveTypes = [
             'annual' => LeaveType::query()->updateOrCreate(['code' => 'ANNUAL'], [
@@ -124,42 +126,54 @@ class DatabaseSeeder extends Seeder
             ]),
         ];
 
+        $superAdmin = User::query()->updateOrCreate(['email' => 'super@hrleave.test'], [
+            'name'     => 'Super Admin',
+            'password' => $defaultPassword,
+            'email_verified_at' => now(),
+            'status'   => 'active',
+        ]);
+
         $admin = User::query()->updateOrCreate(['email' => 'admin@hrleave.test'], [
-            'name' => 'Admin User',
+            'name'     => 'Admin User',
             'password' => $defaultPassword,
             'email_verified_at' => now(),
             'department_id' => $departments->id,
+            'status'   => 'active',
         ]);
 
         $manager = User::query()->updateOrCreate(['email' => 'manager@hrleave.test'], [
-            'name' => 'Manager User',
+            'name'     => 'Manager User',
             'password' => $defaultPassword,
             'email_verified_at' => now(),
             'department_id' => $departments->id,
+            'status'   => 'active',
         ]);
 
         $departments->update(['manager_id' => $manager->id]);
 
         $employee = User::query()->updateOrCreate(['email' => 'employee@hrleave.test'], [
-            'name' => 'Employee User',
+            'name'     => 'Employee User',
             'password' => $defaultPassword,
             'email_verified_at' => now(),
             'department_id' => $departments->id,
             'manager_id' => $manager->id,
             'hire_date' => now()->subMonths(14)->toDateString(),
+            'status'   => 'active',
         ]);
 
         $hr = User::query()->updateOrCreate(['email' => 'hr@hrleave.test'], [
-            'name' => 'HR User',
+            'name'     => 'HR User',
             'password' => $defaultPassword,
             'email_verified_at' => now(),
             'department_id' => $departments->id,
+            'status'   => 'active',
         ]);
 
+        $superAdmin->roles()->sync([$roles['super_admin']->id]);
         $admin->roles()->sync([$roles['admin']->id]);
-        $manager->roles()->sync([$roles['manager']->id]);
+        $manager->roles()->sync([$roles['employee']->id]);
         $employee->roles()->sync([$roles['employee']->id]);
-        $hr->roles()->sync([$roles['hr']->id]);
+        $hr->roles()->sync([$roles['hr_manager']->id]);
 
         $year = (int) Carbon::now()->format('Y');
 
@@ -211,5 +225,7 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true,
             ],
         );
+
+        $this->call(ErpDataSeeder::class);
     }
 }
