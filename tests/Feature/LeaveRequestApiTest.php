@@ -59,10 +59,19 @@ class LeaveRequestApiTest extends TestCase
             'carried_over_days' => 2,
         ]);
 
+        $startDate = now()->addDays(10);
+        while ($startDate->isWeekend()) {
+            $startDate->addDay();
+        }
+        $endDate = $startDate->copy()->addDays(1);
+        while ($endDate->isWeekend()) {
+            $endDate->addDay();
+        }
+
         $requestResponse = $this->actingAs($employee)->postJson('/api/v1/leave/requests', [
             'leave_type_id' => $leaveType->id,
-            'start_date' => now()->addDays(10)->toDateString(),
-            'end_date' => now()->addDays(11)->toDateString(),
+            'start_date' => $startDate->toDateString(),
+            'end_date' => $endDate->toDateString(),
             'request_unit' => 'day',
             'reason' => 'Personal travel',
         ]);
