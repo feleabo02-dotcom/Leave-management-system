@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Models\Attendance;
 use App\Services\LeaveBalanceService;
 use App\Services\LeaveDashboardService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class LeaveDashboardController extends Controller
 {
@@ -47,8 +49,23 @@ class LeaveDashboardController extends Controller
         $calendarData = $this->dashboardService->getYearCalendarData($user, $year);
         $overviewStats = $this->dashboardService->getOverviewStats($user, $year);
 
-        $years = range(now()->year - 2, now()->year + 2);
+        // 1. Weekly Attendance (Bar Chart)
+        $startOfWeek = now()->startOfWeek();
+        $attendanceData = Attendance::where('employee_id', $user->employee->id)
+            ->whereBetween('check_in', [$startOfWeek, now()->endOfWeek()])
+            ->selectRaw('strftime("%w", check_in) as day, COUNT(*) as count')
+            ->groupBy('day')
+            ->get()
+            ->pluck('count', 'day');
+        
+        $weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        $chartAttendance = [];
+        for ($i = 1; $i <= 7; $i++) {
+            $dayIndex = $i % 7; // Sunday is 0 in strftime %w
+            $chartAttendance[] = $attendanceData[$dayIndex] ?? 0;
+        }
 
+        $years = range(now()->year - 2, now()->year + 2);
         $hoursPerDay = $this->balanceService->getHoursPerDay();
 
         return view('erp.employee.dashboard', compact(
@@ -60,28 +77,8 @@ class LeaveDashboardController extends Controller
             'year',
             'years',
             'hoursPerDay',
-        ));
-    }
-
-    public function calendar(Request $request): View
-    {
-        $user = $request->user();
-        $year = (int) ($request->get('year', now()->year));
-        $month = (int) ($request->get('month', now()->month));
-
-        $calendarData = $this->dashboardService->getYearCalendarData($user, $year);
-        $overviewStats = $this->dashboardService->getOverviewStats($user, $year);
-
-        $years = range(now()->year - 2, now()->year + 2);
-        $months = range(1, 12);
-
-        return view('erp.employee.calendar', compact(
-            'calendarData',
-            'overviewStats',
-            'year',
-            'month',
-            'years',
-            'months',
+            'weekDays',
+            'chartAttendance'
         ));
     }
 }
